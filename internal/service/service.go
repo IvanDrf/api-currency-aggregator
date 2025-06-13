@@ -3,43 +3,35 @@ package service
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"sync"
 	"time"
 )
 
-const (
-	usd = "USD"
-	eur = "EUR"
-)
-
 type Parser interface {
-	Parse(req *http.Response, currency string) (Source, error)
+	Parse(currency string) (Source, error)
 }
 
 var (
-	urls = []string{
-		"https://www.cbr-xml-daily.ru/daily_json.js",
-		"https://api.binance.com/api/v3/ticker/price?symbol=USDTRUB",
-	}
-
-	parsers = []Parser{&cbr{}, &binance{}}
+	parsers    = []Parser{&cbr{}, &binance{}}
+	currencies = []string{"USD", "EUR"}
 )
 
 func GetCurrency() {
-	sources := make(chan Source, len(urls))
+	sources := make(chan Source, 2*len(currencies))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	wg := new(sync.WaitGroup)
 
-	for i := 0; i < len(urls); i++ {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			Worker(ctx, parsers[i], urls[i], sources)
-		}(i)
+	for i := 0; i < len(currencies); i++ {
+		for j := 0; j < len(currencies); j++ {
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				Worker(ctx, parsers[i], currencies[j], sources)
+			}(i)
+		}
 	}
 
 	go func() {
@@ -52,22 +44,16 @@ func GetCurrency() {
 	}
 }
 
-func Worker(ctx context.Context, parser Parser, url string, sources chan Source) {
+func Worker(ctx context.Context, parser Parser, currency string, sources chan Source) {
 	select {
 	case <-ctx.Done():
 		return
 
 	default:
-		resp, err := http.Get(url)
+		res, err := parser.Parse(currency)
 		if err != nil {
 			return
 		}
-
-		res, err := parser.Parse(resp, "USD")
-		if err != nil {
-			return
-		}
-		defer resp.Body.Close()
 
 		select {
 		case sources <- res:

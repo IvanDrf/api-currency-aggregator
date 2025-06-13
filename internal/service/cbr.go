@@ -6,11 +6,19 @@ import (
 	"net/http"
 )
 
+const cbrUrl = "https://www.cbr-xml-daily.ru/daily_json.js"
+
 type cbr struct {
 	Valute map[string]map[string]interface{} `json:"Valute"`
 }
 
-func (c *cbr) Parse(resp *http.Response, currency string) (Source, error) {
+func (c *cbr) Parse(currency string) (Source, error) {
+	resp, err := http.Get(cbrUrl)
+	if err != nil {
+		return Source{}, errors.New("can't send get req to cbr")
+	}
+	defer resp.Body.Close()
+
 	res := cbr{}
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		return Source{}, errors.New("can't parse cbr json")
