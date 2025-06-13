@@ -5,33 +5,44 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/IvanDrf/currency-aggregator/internal/models"
 )
 
 type Parser interface {
-	Parse(currency string) (Source, error)
+	Parse(currency string) (models.Source, error)
 }
 
 var (
-	parsers    = []Parser{&cbr{}, &binance{}}
-	currencies = []string{"USD", "EUR"}
+	parsers = []Parser{&cbr{}, &binance{}}
 )
 
-func GetCurrency() {
-	sources := make(chan Source, len(parsers)*len(currencies))
+func GetCurrency(currency string) models.Responce {
+	sources := workerPool(currency)
+	fmt.Println(sources)
+	return models.Responce{
+		Currency: currency,
+		Agerage:  calculateAverage(sources),
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		Sources: sources,
+	}
+}
+
+func workerPool(currency string) []models.Source {
+	sources := make(chan models.Source, len(parsers))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	wg := new(sync.WaitGroup)
 
-	for i := 0; i < len(currencies); i++ {
-		for j := 0; j < len(currencies); j++ {
-			wg.Add(1)
-			go func(i int) {
-				defer wg.Done()
-				Worker(ctx, parsers[i], currencies[j], sources)
-			}(i)
-		}
+	for i := 0; i < len(parsers); i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			worker(ctx, parsers[i], currency, sources)
+		}(i)
+
 	}
 
 	go func() {
@@ -39,12 +50,17 @@ func GetCurrency() {
 		close(sources)
 	}()
 
+	result := make([]models.Source, 0, len(parsers))
+
 	for value := range sources {
 		fmt.Println(value)
+		result = append(result, value)
 	}
+
+	return result
 }
 
-func Worker(ctx context.Context, parser Parser, currency string, sources chan Source) {
+func worker(ctx context.Context, parser Parser, currency string, sources chan models.Source) {
 	select {
 	case <-ctx.Done():
 		return
@@ -63,4 +79,17 @@ func Worker(ctx context.Context, parser Parser, currency string, sources chan So
 		}
 	}
 
+}
+
+func calculateAverage(sources []models.Source) float64 {
+	if len(sources) == 0 {
+		return 0
+	}
+
+	var summ float64
+	for _, value := range sources {
+		summ += value.Rate
+	}
+
+	return summ / float64(len(sources))
 }
