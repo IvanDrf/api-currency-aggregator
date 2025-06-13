@@ -24,7 +24,7 @@ func (b *binance) Parse(currency string) (Source, error) {
 		binanceUrl = binanceUrl + "EURUSDT"
 
 	default:
-		return Source{Source: "binance", Rate: 0}, nil
+		return Source{}, errors.New("binance is not supporting EUR/RUB")
 
 	}
 

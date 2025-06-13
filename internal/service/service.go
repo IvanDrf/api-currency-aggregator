@@ -17,7 +17,7 @@ var (
 )
 
 func GetCurrency() {
-	sources := make(chan Source, 2*len(currencies))
+	sources := make(chan Source, len(parsers)*len(currencies))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
