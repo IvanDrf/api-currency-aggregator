@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -19,7 +18,6 @@ var (
 
 func GetCurrency(currency string) models.Responce {
 	sources := workerPool(currency)
-	fmt.Println(sources)
 	return models.Responce{
 		Currency: currency,
 		Agerage:  calculateAverage(sources),
@@ -53,7 +51,6 @@ func workerPool(currency string) []models.Source {
 	result := make([]models.Source, 0, len(parsers))
 
 	for value := range sources {
-		fmt.Println(value)
 		result = append(result, value)
 	}
 

@@ -3,14 +3,11 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/IvanDrf/currency-aggregator/internal/models"
 )
-
-// USDTRUB
 
 type binance struct {
 	Symbol string `json:"symbol"`
@@ -50,6 +47,5 @@ func (b *binance) Parse(currency string) (models.Source, error) {
 		return models.Source{}, errors.New("bad rate in binance")
 	}
 
-	fmt.Println("bin: ", currency, rate)
 	return models.Source{Currency: currency, Source: "binance", Rate: rate}, nil
 }
