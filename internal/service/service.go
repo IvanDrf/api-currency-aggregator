@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"math"
 	"sync"
 	"time"
 
 	"github.com/IvanDrf/currency-aggregator/internal/models"
+	"github.com/IvanDrf/currency-aggregator/internal/sources"
 )
 
 type Parser interface {
@@ -13,11 +15,15 @@ type Parser interface {
 }
 
 var (
-	parsers = []Parser{&cbr{}, &binance{}}
+	parsers = []Parser{&sources.Cbr{}, &sources.Binance{}, &sources.Coingecko{}}
 )
 
 func GetCurrency(currency string) models.Responce {
 	sources := workerPool(currency)
+	for i := range sources {
+		sources[i].Round()
+	}
+
 	return models.Responce{
 		Currency: currency,
 		Agerage:  calculateAverage(sources),
@@ -88,5 +94,5 @@ func calculateAverage(sources []models.Source) float64 {
 		summ += value.Rate
 	}
 
-	return summ / float64(len(sources))
+	return math.Round(1_000*summ/float64(len(sources))) / 1_000
 }
