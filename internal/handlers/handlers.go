@@ -8,8 +8,9 @@ import (
 )
 
 var currencyList = map[string]bool{
-	"cbr":     true,
-	"binance": true,
+	"cbr":       true,
+	"binance":   true,
+	"coingecko": true,
 }
 
 func GetListHandler(ctx echo.Context) error {
