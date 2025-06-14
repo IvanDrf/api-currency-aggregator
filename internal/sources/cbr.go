@@ -1,4 +1,4 @@
-package service
+package sources
 
 import (
 	"encoding/json"
@@ -10,18 +10,18 @@ import (
 
 const cbrUrl = "https://www.cbr-xml-daily.ru/daily_json.js"
 
-type cbr struct {
+type Cbr struct {
 	Valute map[string]map[string]interface{} `json:"Valute"`
 }
 
-func (c *cbr) Parse(currency string) (models.Source, error) {
+func (c *Cbr) Parse(currency string) (models.Source, error) {
 	resp, err := http.Get(cbrUrl)
 	if err != nil {
 		return models.Source{}, errors.New("can't send get req to cbr")
 	}
 	defer resp.Body.Close()
 
-	res := cbr{}
+	res := Cbr{}
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		return models.Source{}, errors.New("can't parse cbr json")
 	}

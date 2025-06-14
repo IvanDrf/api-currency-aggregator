@@ -7,11 +7,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func PostHandler(ctx echo.Context) error {
-	return nil
+var currencyList = map[string]bool{
+	"cbr":       true,
+	"binance":   true,
+	"coingecko": true,
 }
 
-func GetHandler(ctx echo.Context) error {
+func GetListHandler(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, currencyList)
+}
+
+func GetCurrencyHandler(ctx echo.Context) error {
 	currency := ctx.QueryParam("currency")
 
 	switch currency {

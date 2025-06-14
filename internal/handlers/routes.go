@@ -1,7 +1,7 @@
 package handlers
 
 func (s *Server) RegisterRoutes() {
-	s.Server.POST("/", PostHandler)
-	s.Server.GET("/", GetHandler)
+	s.Server.GET("/sources", GetListHandler)
+	s.Server.GET("/currency", GetCurrencyHandler)
 
 }

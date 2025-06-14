@@ -1,20 +1,21 @@
-package service
+package sources
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/IvanDrf/currency-aggregator/internal/models"
 )
 
-type binance struct {
+type Binance struct {
 	Symbol string `json:"symbol"`
 	Price  string `json:"price"`
 }
 
-func (b *binance) Parse(currency string) (models.Source, error) {
+func (b *Binance) Parse(currency string) (models.Source, error) {
 	binanceUrl := "https://api.binance.com/api/v3/ticker/price?symbol="
 
 	switch currency {
@@ -25,7 +26,7 @@ func (b *binance) Parse(currency string) (models.Source, error) {
 		binanceUrl = binanceUrl + "EURUSDT"
 
 	default:
-		return models.Source{}, errors.New("binance is not supporting EUR/RUB")
+		return models.Source{}, errors.New(fmt.Sprintf("binance is not supporting %s", currency))
 
 	}
 
@@ -35,7 +36,7 @@ func (b *binance) Parse(currency string) (models.Source, error) {
 	}
 	defer resp.Body.Close()
 
-	res := binance{}
+	res := Binance{}
 
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		return models.Source{}, errors.New("can't parse binance json")
