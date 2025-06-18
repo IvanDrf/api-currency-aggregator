@@ -41,7 +41,7 @@
     
   - USD
     ```shell
-    curl -X GET http://localhost:8080/currency?currency=EUR
+    curl -X GET http://localhost:8080/currency?currency=USD
     ```
   
     ```json
