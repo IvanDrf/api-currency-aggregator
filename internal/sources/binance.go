@@ -10,7 +10,7 @@ import (
 	"github.com/IvanDrf/currency-aggregator/internal/models"
 )
 
-type Binance struct {
+type Binance struct { //
 	Symbol string `json:"symbol"`
 	Price  string `json:"price"`
 }

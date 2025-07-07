@@ -1,0 +1,18 @@
+{
+    "currency": "USD",
+    "average_rate": 82.739,
+    "sources": [
+        {
+            "source": "coingecko",
+            "rate": 78.402
+        },
+        {
+            "source": "binance",
+            "rate": 91.1
+        },
+        {
+            "source": "cbr",
+            "rate": 78.714
+        }
+    ]
+}
